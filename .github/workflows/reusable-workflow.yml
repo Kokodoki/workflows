@@ -9,6 +9,8 @@ on:
     # secrets:
     #   EXAMPLE_SECRET:
     #     required: true
+env:
+  EXAMPLE_ENV: ${{ vars}}
 
 jobs:
   example_job:
@@ -21,3 +23,4 @@ jobs:
         run: |
           echo "Input recibido: ${{ vars.EXAMPLE_VAR }}"
           echo "Secreto recibido: ${{ secrets.EXAMPLE_SECRET }}"
+          echo "Variable de entorno: ${{ env.EXAMPLE_ENV }}"
