@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-tags: true
 
       - name: Get major tag
         run: |
@@ -38,5 +40,4 @@ jobs:
       - name: Push major tag
         run: |
           git tag -f $MAJOR_TAG $SEMVER_TAG
-          git tag -d $MAJOR_TAG
           git push origin -f $MAJOR_TAG
