@@ -1,0 +1,41 @@
+name: Update Tag
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      semver-tag:
+        description: 'Ingresa la versión en formato semver (por ejemplo, v1.2.3). Esta versión será utilizada para actualizar el major tag correspondiente a la misma versión indicada.'
+        required: true
+  workflow_call:
+    inputs:
+      semver-tag:
+        description: 'Ingresa la versión en formato semver (por ejemplo, v1.2.3). Esta versión será utilizada para actualizar el major tag correspondiente a la misma versión indicada.'
+        required: true
+        type: string
+
+env:
+  SEMVER_TAG: ${{ github.event.inputs.semver-tag || github.event.release.tag_name }}
+
+permissions:
+  contents: write
+
+jobs:
+  update-tag:
+    environment:
+      name: Update Tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get major tag
+        run: |
+          major=$(echo "$SEMVER_TAG" | cut -d. -f1)
+          echo "MAJOR_TAG=$major" >> $GITHUB_ENV
+
+      - name: Push major tag
+        run: |
+          git tag -f $MAJOR_TAG $SEMVER_TAG
+          git push origin -f $MAJOR_TAG
