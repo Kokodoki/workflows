@@ -2,13 +2,13 @@ name: Reusable Workflow Base
 
 on:
   workflow_call:
-    inputs:
-      example-input:
-        required: false
-        type: string
-    secrets:
-      EXAMPLE_SECRET:
-        required: true
+    # inputs:
+    #   example-input:
+    #     required: false
+    #     type: string
+    # secrets:
+    #   EXAMPLE_SECRET:
+    #     required: true
 
 jobs:
   example_job:
@@ -19,5 +19,5 @@ jobs:
 
       - name: Print inputs & secrets
         run: |
-          echo "Input recibido: ${{ inputs.example-input }}"
+          echo "Input recibido: ${{ vars.EXAMPLE_VAR }}"
           echo "Secreto recibido: ${{ secrets.EXAMPLE_SECRET }}"
