@@ -20,7 +20,6 @@ env:
 
 permissions:
   contents: write
-  actions: write
 
 jobs:
   update-tag:
@@ -41,6 +40,5 @@ jobs:
 
       - name: Push major tag
         run: |
-          git tag -d $MAJOR_TAG | true
           git tag -f $MAJOR_TAG $SEMVER_TAG
           git push origin -f $MAJOR_TAG
