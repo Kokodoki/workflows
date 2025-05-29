@@ -10,7 +10,7 @@ on:
     #   EXAMPLE_SECRET:
     #     required: true
 env:
-  EXAMPLE_ENV: ${{ vars}}
+  EXAMPLE_ENV: ${{ vars.EXAMPLE_VAR}}
 
 jobs:
   example_job:
