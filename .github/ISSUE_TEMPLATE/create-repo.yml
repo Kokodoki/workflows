@@ -2,6 +2,7 @@ name: 🚀 Solicitud de Nuevo Repositorio
 description: Solicita la creación de un nuevo repositorio en GitHub
 title: 'Nuevo Repositorio - [NOMBRE_DEL_REPOSITORIO]'
 labels: ['nuevo-repo', 'pendiente']
+projects: ["octo-org/1", "octo-org/44"]
 assignees: ''
 
 body:
