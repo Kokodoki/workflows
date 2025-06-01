@@ -1,0 +1,106 @@
+name: 🚀 Solicitud de Nuevo Repositorio
+about: Solicita la creación de un nuevo repositorio en GitHub
+title: 'feat: Nuevo Repositorio - [NOMBRE_DEL_REPOSITORIO]'
+labels: 'nuevo-repo, pendiente'
+assignees: ''
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por solicitar la creación de un nuevo repositorio. Por favor, completa la siguiente información de la manera más detallada posible.
+
+  - type: input
+    id: nombre-repositorio
+    attributes:
+      label: '📝 Nombre del Repositorio:'
+      description: 'Nombre exacto que tendrá el repositorio en GitHub (ej. `mi-microservicio-usuarios`, `libreria-utilidades-java`). Utiliza minúsculas y guiones para separar palabras.'
+      placeholder: 'ej. mi-proyecto-nuevo'
+    validations:
+      required: true
+
+  - type: input
+    id: descripcion-repositorio
+    attributes:
+      label: '📄 Descripción del Repositorio:'
+      description: 'Una breve descripción del propósito y funcionalidad del repositorio.'
+      placeholder: 'ej. Servicio REST para la gestión de usuarios.'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: lenguaje-principal
+    attributes:
+      label: '💻 Lenguaje Principal del Repositorio:'
+      description: 'Selecciona el lenguaje de programación predominante en este repositorio.'
+      options:
+        - 'Java'
+        - 'Python'
+        - 'JavaScript/TypeScript'
+        - 'Go'
+        - 'HCL (Terraform)'
+        - 'Shell Script'
+        - 'SQL'
+        - 'YAML/JSON (Configuraciones)'
+        - 'Otro (especificar en "Otros detalles")'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: tipo-repositorio
+    attributes:
+      label: '📦 Tipo de Repositorio:'
+      description: 'Clasificación principal del contenido y propósito del repositorio.'
+      options:
+        - 'Microservicio'
+        - 'Librería/Módulo'
+        - 'Infraestructura como Código (IaC)'
+        - 'Función Lambda/Serverless'
+        - 'Aplicación Web/Frontend'
+        - 'CLI Tool'
+        - 'Base de Datos (scripts, schemas)'
+        - 'Documentación'
+        - 'Monorepo'
+        - 'Plantilla/Template'
+        - 'Ejemplo/Demo'
+        - 'Otro (especificar en "Otros detalles")'
+    validations:
+      required: true
+
+  - type: textarea
+    id: equipo-responsable
+    attributes:
+      label: '👥 Equipo o Persona Responsable:'
+      description: 'Nombre del equipo o usuario(s) que será(n) responsable(s) del mantenimiento y desarrollo del repositorio.'
+      placeholder: 'ej. Equipo Backend Alpha, @usuario_github'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: visibilidad-repositorio
+    attributes:
+      label: '👁️ Visibilidad del Repositorio:'
+      description: 'Indica si el repositorio debe ser público o privado.'
+      options:
+        - 'Privado (Solo acceso a miembros de la organización)'
+        - 'Público (Accesible para cualquiera)'
+    validations:
+      required: true
+
+  - type: textarea
+    id: otros-detalles
+    attributes:
+      label: '➕ Otros Detalles / Comentarios Adicionales:'
+      description: 'Cualquier otra información relevante, como dependencias, necesidades específicas de CI/CD, estructura inicial de directorios, si es un fork, etc. Aquí puedes especificar "Otro" de las listas anteriores.'
+      placeholder: 'ej. Necesita integración con Jenkins. Estructura inicial: src/main/java y src/test/java.'
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: confirmacion-lectura
+    attributes:
+      label: '✅ Confirmación:'
+      description: 'Por favor, confirma que has revisado la información.'
+      options:
+        - label: 'He revisado que toda la información proporcionada es correcta y completa.'
+          required: true
