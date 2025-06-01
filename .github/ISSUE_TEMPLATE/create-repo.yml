@@ -1,7 +1,7 @@
 name: 🚀 Solicitud de Nuevo Repositorio
-about: Solicita la creación de un nuevo repositorio en GitHub
-title: 'feat: Nuevo Repositorio - [NOMBRE_DEL_REPOSITORIO]'
-labels: 'nuevo-repo, pendiente'
+description: Solicita la creación de un nuevo repositorio en GitHub
+title: 'Nuevo Repositorio - [NOMBRE_DEL_REPOSITORIO]'
+labels: ['nuevo-repo', 'pendiente']
 assignees: ''
 
 body:
