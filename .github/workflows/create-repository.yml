@@ -1,0 +1,20 @@
+name: Automated Repository Creation
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  create-repository:
+    permissions:
+      contents: write
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Repository Details
+        id: extract_details
+        run: |
+          # El output de issue-forms-body-parser es un JSON
+          # Puedes acceder a los campos del formulario usando el ID del campo.
+          # Asegúrate de que los IDs aquí coincidan con los de tu issue template.
+          echo "${{ steps.parse_issue_body.outputs.payload }}"
