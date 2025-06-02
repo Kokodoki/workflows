@@ -22,17 +22,13 @@ jobs:
           echo "labels: ${{ github.event.issue.labels }}"
           echo "user: ${{ github.event.issue.user.login }}"
 
-      - name: Run Issue form parser
-        id: parse
-        uses: peter-murray/issue-forms-body-parser@v4.0.0
+      - name: Parse Issue
+        id: parser
+        uses: issue-ops/parser@v4
         with:
-          issue_id: ${{ github.event.issue.number }}
-          separator: '###'
-          label_marker_start: ''
-          label_marker_end: ''
+          body: ${{ github.event.issue.body }}
+          issue-form-template: create-repo.yml
     
-      - name: Show parsed data JSON
-        env:
-          parsed_data: ${{ steps.parse.outputs.payload }}
-        run: |
-          echo "$parsed_data"
+      - name: Output Issue JSON
+        id: output-issue
+        run: echo ${{ steps.parser.outputs.json }}
