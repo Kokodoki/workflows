@@ -11,6 +11,9 @@ jobs:
       issues: write
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Extract Repository Details
         id: extract_details
         run: |
