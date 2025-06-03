@@ -1,0 +1,38 @@
+name: 🚀 Solicitud de Nuevo Repositorio
+description: Solicita la creación de un nuevo repositorio en GitHub
+title: 'Nuevo Repositorio - [NOMBRE_DEL_REPOSITORIO]'
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por solicitar la creación de un nuevo repositorio. Por favor, completa la siguiente información de la manera más detallada posible.
+
+  - type: input
+    id: name
+    attributes:
+      label: '📝 Nombre del Repositorio:'
+      description: 'Nombre exacto que tendrá el repositorio en GitHub (ej. `bancadigital-ms-<name>`, `bancadigital-lib-<name>`, `bancadigital-infra-name`). Utiliza minúsculas y guiones para separar palabras.'
+      placeholder: 'ej. mi-proyecto-nuevo'
+    validations:
+      required: true
+
+  - type: input
+    id: description
+    attributes:
+      label: '📄 Descripción del Repositorio:'
+      description: 'Una breve descripción del propósito y funcionalidad del repositorio.'
+      placeholder: 'ej. Servicio REST para la gestión de usuarios.'
+    validations:
+      required: true
+
+  - type: dropdown
+    id: template
+    attributes:
+      label: '📦 Tipo de Template a Utilizar:'
+      description: 'Selecciona el tipo de template base para este repositorio.'
+      options:
+        - 'spring-boot-ms'
+        - 'terraform-aws-module'
+    validations:
+      required: true
