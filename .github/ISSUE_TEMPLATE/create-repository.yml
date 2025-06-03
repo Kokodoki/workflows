@@ -12,8 +12,8 @@ body:
     id: name
     attributes:
       label: '📝 Nombre del Repositorio:'
-      description: 'Nombre exacto que tendrá el repositorio en GitHub (ej. `bancadigital-ms-<name>`, `bancadigital-lib-<name>`, `bancadigital-infra-name`). Utiliza minúsculas y guiones para separar palabras.'
-      placeholder: 'ej. mi-proyecto-nuevo'
+      description: 'Nombre exacto que tendrá el repositorio en GitHub (ej. `terraform-aws-<name>`). Utiliza minúsculas y guiones para separar palabras.'
+      placeholder: 'terraform-aws-microservice'
     validations:
       required: true
 
@@ -22,7 +22,7 @@ body:
     attributes:
       label: '📄 Descripción del Repositorio:'
       description: 'Una breve descripción del propósito y funcionalidad del repositorio.'
-      placeholder: 'ej. Servicio REST para la gestión de usuarios.'
+      placeholder: 'Módulo de terraform para microservicios en AWS EKS'
     validations:
       required: true
 
@@ -32,7 +32,7 @@ body:
       label: '📦 Tipo de Template a Utilizar:'
       description: 'Selecciona el tipo de template base para este repositorio.'
       options:
-        - 'spring-boot-ms'
         - 'terraform-aws-module'
+        - 'spring-boot-ms'
     validations:
       required: true
