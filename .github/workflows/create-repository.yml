@@ -6,19 +6,13 @@ on:
 
 jobs:
   create-repository:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     steps:
-      - name: Get Token
-        uses: actions/create-github-app-token@v1
-        id: app-token
-        with:
-          app-id: ${{ vars.APP_ID_SETUP_REPO }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY_SETUP_REPO }}
-          owner: ${{ github.repository_owner }}
-
       - name: Add reaction to Issue
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh api \
@@ -45,6 +39,14 @@ jobs:
           echo "NAME=$(jq -r .name issue.json)" >> $GITHUB_ENV
           echo "DESCRIPTION=$(jq -r .description issue.json)" >> $GITHUB_ENV
           echo "TEMPLATE=$(jq -r '.template[0]' issue.json)" >> $GITHUB_ENV
+
+      - name: Get Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID_SETUP_REPO }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY_SETUP_REPO }}
+          owner: ${{ github.repository_owner }}
 
       - name: Create Repository
         env:
@@ -123,6 +125,8 @@ jobs:
             -f "properties[][property_name]=ownership" -f "properties[][value]=Kokodoki"
 
   report-status:
+    permissions:
+      issues: write
     needs:
       - create-repository
       - setup-repository
@@ -131,7 +135,7 @@ jobs:
       - name: Comentar Issue con el estatus del workflow
         if: always()
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           CREATE_REPO_STATUS: ${{ needs.create-repository.result }}
           SETUP_REPO_STATUS: ${{ needs.setup-repository.result }}
