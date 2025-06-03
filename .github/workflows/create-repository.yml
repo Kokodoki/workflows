@@ -142,15 +142,15 @@ jobs:
       - name: Report Status
         if: always()
         run: |
-          MSG="### Reporte"
-          MSG+="- Creación del repositorio: **$CREATE_REPO_STATUS**"
-          MSG+="- Configuración del repositorio: **$SETUP_REPO_STATUS**"
+          MSG="### Reporte\n\n"
+          MSG+="- Creación del repositorio: **$CREATE_REPO_STATUS**\n"
+          MSG+="- Configuración del repositorio: **$SETUP_REPO_STATUS**\n\n"
           if [ "$CREATE_REPO_STATUS" = "success" ] && [ "$SETUP_REPO_STATUS" = "success" ]; then
             REPO_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
-            MSG+="#### ✅ El workflow finalizó correctamente y el repositorio fue creado/configurado."
-            MSG+="#### 🔗 Repositorio: $REPO_URL"
+            MSG+="#### ✅ El workflow finalizó correctamente y el repositorio fue creado/configurado.\n\n"
+            MSG+="#### 🔗 Repositorio: $REPO_URL\n"
           else
-            MSG+="### ❌ El workflow falló. Por favor revisa los logs para más detalles."
+            MSG+="### ❌ El workflow falló. Por favor revisa los logs para más detalles.\n"
           fi
           gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body "$MSG"
 
