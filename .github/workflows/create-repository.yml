@@ -19,7 +19,7 @@ jobs:
         uses: issue-ops/parser@v4
         with:
           body: ${{ github.event.issue.body }}
-          issue-form-template: create-repo.yml
+          issue-form-template: create-repository.yml
           workspace: ${{ github.workspace }}
     
       - name: Output Issue JSON
