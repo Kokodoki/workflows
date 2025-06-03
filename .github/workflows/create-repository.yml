@@ -142,7 +142,7 @@ jobs:
       - name: Report Status
         if: always()
         run: |
-          MSG="### 📑 Reporte\n\n"
+          MSG="### 📢 Reporte\n\n"
           MSG+="- Creación del repositorio: **$CREATE_REPO_STATUS**\n"
           MSG+="- Configuración del repositorio: **$SETUP_REPO_STATUS**\n\n"
           if [ "$CREATE_REPO_STATUS" = "success" ] && [ "$SETUP_REPO_STATUS" = "success" ]; then
