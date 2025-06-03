@@ -38,17 +38,15 @@ jobs:
       - name: Create repo
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
-          TOPICS_IAC: "--add-topic terraform --add-topic iac"
-          TOPICS_MS: "--add-topic micro"
         run: |
           gh repo create ${{ github.repository_owner }}/$NAME --public --description $DESCRIPTION --template ${{ github.repository_owner }}/$TEMPLATE
           gh repo edit ${{ github.repository_owner }}/$NAME --delete-branch-on-merge
           case "$TEMPLATE" in
               "terraform-aws-module")
-                  gh repo edit ${{ github.repository_owner }}/$NAME $TOPIC_IAC
+                  gh repo edit ${{ github.repository_owner }}/$NAME --add-topic terraform --add-topic iac
                   ;;
               "spring-boot-ms")
-                  gh repo edit ${{ github.repository_owner }}/$NAME $TOPIC_MS
+                  gh repo edit ${{ github.repository_owner }}/$NAME --add-topic micro
                   ;;
               *)
                   echo "Selecciona un repositorio valido"
