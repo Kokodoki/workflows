@@ -8,6 +8,17 @@ jobs:
   create-repository:
     runs-on: ubuntu-latest
     steps:
+      - name: Add reaction to Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository_owner }}/issues/$ISSUE_NUMBER/reactions \
+            -f content='eyes'
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -110,3 +121,27 @@ jobs:
             -H "X-GitHub-Api-Version: 2022-11-28" \
             /repos/${{ github.repository_owner }}/$NAME/properties/values \
             -f "properties[][property_name]=ownership" -f "properties[][value]=Kokodoki"
+
+  report-status:
+    needs:
+      - create-repository
+      - setup-repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comentar Issue con el estatus del workflow
+        if: always()
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          CREATE_REPO_STATUS: ${{ needs.create-repository.result }}
+          SETUP_REPO_STATUS: ${{ needs.setup-repository.result }}
+        run: |
+          MSG="**Estado de los jobs:**%0A"
+          MSG+="• Creación del repositorio: **$CREATE_REPO_STATUS**%0A"
+          MSG+="• Configuración del repositorio: **$SETUP_REPO_STATUS**%0A"
+          if [ "$CREATE_REPO_STATUS" = "success" ] && [ "$SETUP_REPO_STATUS" = "success" ]; then
+            MSG+="✅ El workflow finalizó correctamente y el repositorio fue creado/configurado."
+          else
+            MSG+="❌ El workflow falló. Por favor revisa los logs para más detalles."
+          fi
+          gh issue comment "$ISSUE_NUMBER" --body "$MSG"
