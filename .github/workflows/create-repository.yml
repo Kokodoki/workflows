@@ -39,19 +39,22 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
+          echo $NAME
+          echo $DESCRIPTION
+          echo $TEMPLATE
           gh repo create ${{ github.repository_owner }}/$NAME --public --description $DESCRIPTION --template ${{ github.repository_owner }}/$TEMPLATE
-          gh repo edit ${{ github.repository_owner }}/$NAME --delete-branch-on-merge
-          case "$TEMPLATE" in
-              "terraform-aws-module")
-                  gh repo edit ${{ github.repository_owner }}/$NAME --add-topic terraform --add-topic iac
-                  ;;
-              "spring-boot-ms")
-                  gh repo edit ${{ github.repository_owner }}/$NAME --add-topic micro
-                  ;;
-              *)
-                  echo "Selecciona un repositorio valido"
-                  ;;
-          esac
+          # gh repo edit ${{ github.repository_owner }}/$NAME --delete-branch-on-merge
+          # case "$TEMPLATE" in
+          #     "terraform-aws-module")
+          #         gh repo edit ${{ github.repository_owner }}/$NAME --add-topic terraform --add-topic iac
+          #         ;;
+          #     "spring-boot-ms")
+          #         gh repo edit ${{ github.repository_owner }}/$NAME --add-topic micro
+          #         ;;
+          #     *)
+          #         echo "Selecciona un repositorio valido"
+          #         ;;
+          # esac
 
   setup-repository:
     needs: create-repository
