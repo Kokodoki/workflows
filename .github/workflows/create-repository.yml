@@ -6,6 +6,8 @@ on:
 
 jobs:
   parse-issue:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     outputs:
       name: ${{ steps.set-env.outputs.name }}
@@ -44,8 +46,6 @@ jobs:
 
   create-repository:
     needs: parse-issue
-    permissions:
-      issues: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
