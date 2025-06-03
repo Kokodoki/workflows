@@ -2,7 +2,7 @@ name: Automated Repository Creation
 
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened]
 
 jobs:
   create-repository:
@@ -42,14 +42,14 @@ jobs:
           echo $NAME
           echo $DESCRIPTION
           echo $TEMPLATE
-          gh repo create ${{ github.repository_owner }}/$NAME --public --description $DESCRIPTION --template ${{ github.repository_owner }}/$TEMPLATE
-          # gh repo edit ${{ github.repository_owner }}/$NAME --delete-branch-on-merge
+          gh repo create "${{ github.repository_owner }}/$NAME" --public --description "$DESCRIPTION" --template "${{ github.repository_owner }}/$TEMPLATE"
+          # gh repo edit "${{ github.repository_owner }}/$NAME" --delete-branch-on-merge
           # case "$TEMPLATE" in
           #     "terraform-aws-module")
-          #         gh repo edit ${{ github.repository_owner }}/$NAME --add-topic terraform --add-topic iac
+          #         gh repo edit "${{ github.repository_owner }}/$NAME" --add-topic terraform --add-topic iac
           #         ;;
           #     "spring-boot-ms")
-          #         gh repo edit ${{ github.repository_owner }}/$NAME --add-topic micro
+          #         gh repo edit "${{ github.repository_owner }}/$NAME" --add-topic micro
           #         ;;
           #     *)
           #         echo "Selecciona un repositorio valido"
