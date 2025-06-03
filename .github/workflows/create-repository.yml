@@ -16,7 +16,7 @@ jobs:
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
-            /repos/${{ github.repository_owner }}/issues/$ISSUE_NUMBER/reactions \
+            /repos/${{ github.repository }}/issues/$ISSUE_NUMBER/reactions \
             -f content='eyes'
 
       - name: Checkout
