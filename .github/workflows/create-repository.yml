@@ -4,6 +4,9 @@ on:
   issues:
     types: [opened, reopened]
 
+env:
+  ISSUE_NUMBER: ${{ github.event.issue.number }}
+
 jobs:
   parse-issue:
     permissions:
@@ -17,7 +20,7 @@ jobs:
       - name: Add reaction to Issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          # ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh api \
             --method POST \
@@ -78,8 +81,13 @@ jobs:
           esac
 
   setup-repository:
-    needs: create-repository
+    needs: 
+      - parse-issue
+      - create-repository
     runs-on: ubuntu-latest
+    env:
+      REPO_OWNER: ${{ github.repository_owner }}
+      REPO_NAME: ${{ needs.parse-issue.outputs.name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -102,7 +110,7 @@ jobs:
           --method PUT \
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          /orgs/${{ github.repository_owner }}/teams/$TEAM/repos/${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }} \
+          /orgs/$REPO_OWNER/teams/$TEAM/repos/$REPO_OWNER/$REPO_NAME \
           -f "permission=push"
 
       - name: Set Custom Properties
@@ -113,26 +121,26 @@ jobs:
             --method PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}/properties/values \
+            /repos/$REPO_OWNER/$REPO_NAME/properties/values \
             -f "properties[][property_name]=ownership" -f "properties[][value]=Kokodoki"
 
   report-status:
     permissions:
       issues: write
     needs:
+      - parse-issue
       - create-repository
       - setup-repository
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CREATE_REPO_STATUS: ${{ needs.create-repository.result }}
+      SETUP_REPO_STATUS: ${{ needs.setup-repository.result }}
+      REPO_NAME: ${{ needs.parse-issue.outputs.name }}
+      REPO_OWNER: ${{ github.repository_owner }}
     steps:
       - name: Report Status
         if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          CREATE_REPO_STATUS: ${{ needs.create-repository.result }}
-          SETUP_REPO_STATUS: ${{ needs.setup-repository.result }}
-          REPO_NAME: ${{ env.NAME }}
-          REPO_OWNER: ${{ github.repository_owner }}
         run: |
           MSG="**Estado de los jobs:**\n"
           MSG+="• Creación del repositorio: **$CREATE_REPO_STATUS**\n"
@@ -144,11 +152,8 @@ jobs:
           else
             MSG+="❌ El workflow falló. Por favor revisa los logs para más detalles."
           fi
-          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body "$MSG"
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO_OWNER/$REPO_NAME" --body "$MSG"
 
       - name: Close Issue
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
-          gh issue close "$ISSUE_NUMBER" --repo "${{ github.repository }}" --reason completed
+          gh issue close "$ISSUE_NUMBER" --repo "$REPO_OWNER/$REPO_NAME" --reason completed
