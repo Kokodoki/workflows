@@ -139,13 +139,24 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           CREATE_REPO_STATUS: ${{ needs.create-repository.result }}
           SETUP_REPO_STATUS: ${{ needs.setup-repository.result }}
+          REPO_NAME: ${{ env.NAME }}
+          REPO_OWNER: ${{ github.repository_owner }}
         run: |
           MSG="**Estado de los jobs:**%0A"
           MSG+="• Creación del repositorio: **$CREATE_REPO_STATUS**%0A"
           MSG+="• Configuración del repositorio: **$SETUP_REPO_STATUS**%0A"
           if [ "$CREATE_REPO_STATUS" = "success" ] && [ "$SETUP_REPO_STATUS" = "success" ]; then
-            MSG+="✅ El workflow finalizó correctamente y el repositorio fue creado/configurado."
+            REPO_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
+            MSG+="✅ El workflow finalizó correctamente y el repositorio fue creado/configurado.%0A"
+            MSG+="🔗 Repositorio: $REPO_URL"
           else
             MSG+="❌ El workflow falló. Por favor revisa los logs para más detalles."
           fi
           gh issue comment "$ISSUE_NUMBER" --body "$MSG"
+
+      - name: Close Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue close "$ISSUE_NUMBER" --reason completed
