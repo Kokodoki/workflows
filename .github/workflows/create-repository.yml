@@ -6,9 +6,6 @@ on:
 
 jobs:
   create-repository:
-    permissions:
-      contents: write
-      issues: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,7 +18,94 @@ jobs:
           body: ${{ github.event.issue.body }}
           issue-form-template: create-repository.yml
           workspace: ${{ github.workspace }}
-    
-      - name: Output Issue JSON
-        id: output-issue
-        run: echo ${{ steps.parser.outputs.json }}
+
+      - name: Set env vars from Issue JSON
+        id: set-env
+        run: |
+          echo '${{ steps.parser.outputs.json }}' > issue.json
+          echo "NAME=$(jq -r .name issue.json)" >> $GITHUB_ENV
+          echo "DESCRIPTION=$(jq -r .description issue.json)" >> $GITHUB_ENV
+          echo "TEMPLATE=$(jq -r '.template[0]' issue.json)" >> $GITHUB_ENV
+
+      - name: Get Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID_SETUP_REPO }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY_SETUP_REPO }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Create repo
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TOPICS_IAC: "--add-topic terraform --add-topic iac"
+          TOPICS_MS: "--add-topic micro"
+        run: |
+          gh repo create ${{ github.repository_owner }}/$NAME --public --description $DESCRIPTION --template ${{ github.repository_owner }}/$TEMPLATE
+          gh repo edit ${{ github.repository_owner }}/$NAME --delete-branch-on-merge
+          case "$TEMPLATE" in
+              "terraform-aws-module")
+                  gh repo edit ${{ github.repository_owner }}/$NAME $TOPIC_IAC
+                  ;;
+              "spring-boot-ms")
+                  gh repo edit ${{ github.repository_owner }}/$NAME $TOPIC_MS
+                  ;;
+              *)
+                  echo "Selecciona un repositorio valido"
+                  ;;
+          esac
+
+  setup-repository:
+    needs: create-repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse Issue
+        id: parser
+        uses: issue-ops/parser@v4
+        with:
+          body: ${{ github.event.issue.body }}
+          issue-form-template: create-repository.yml
+          workspace: ${{ github.workspace }}
+
+      - name: Set env vars from Issue JSON
+        id: set-env
+        run: |
+          echo '${{ steps.parser.outputs.json }}' > issue.json
+          echo "NAME=$(jq -r .name issue.json)" >> $GITHUB_ENV
+          echo "DESCRIPTION=$(jq -r .description issue.json)" >> $GITHUB_ENV
+          echo "TEMPLATE=$(jq -r '.template[0]' issue.json)" >> $GITHUB_ENV
+
+      - name: Get Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID_SETUP_REPO }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY_SETUP_REPO }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Add Repository to Team
+        id: permission
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TEAM: devops
+        run: |
+          gh api \
+          --method PUT \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /orgs/${{ github.repository_owner }}/teams/$TEAM/repos/${{ github.repository_owner }}/$NAME \
+          -f "permission=push"
+
+      - name: Set custom properties
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh api \
+            --method PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/${{ github.repository_owner }}/$NAME/properties/values \
+            -f "properties[][property_name]=ownership" -f "properties[][value]=Kokodoki"
