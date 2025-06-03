@@ -35,7 +35,7 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY_SETUP_REPO }}
           owner: ${{ github.repository_owner }}
 
-      - name: Create repo
+      - name: Create Repository
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
@@ -100,7 +100,7 @@ jobs:
           /orgs/${{ github.repository_owner }}/teams/$TEAM/repos/${{ github.repository_owner }}/$NAME \
           -f "permission=push"
 
-      - name: Set custom properties
+      - name: Set Custom Properties
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
