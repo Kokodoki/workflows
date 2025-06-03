@@ -152,8 +152,8 @@ jobs:
           else
             MSG+="❌ El workflow falló. Por favor revisa los logs para más detalles."
           fi
-          gh issue comment "$ISSUE_NUMBER" --repo "$REPO_OWNER/$REPO_NAME" --body "$MSG"
+          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body "$MSG"
 
       - name: Close Issue
         run: |
-          gh issue close "$ISSUE_NUMBER" --repo "$REPO_OWNER/$REPO_NAME" --reason completed
+          gh issue close "$ISSUE_NUMBER" --repo "${{ github.repository }}" --reason completed
