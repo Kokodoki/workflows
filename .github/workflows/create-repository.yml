@@ -81,7 +81,7 @@ jobs:
           esac
 
   setup-repository:
-    needs:
+    needs: 
       - parse-issue
       - create-repository
     runs-on: ubuntu-latest
@@ -142,26 +142,15 @@ jobs:
       - name: Report Status
         if: always()
         run: |
+          MSG="### Reporte"
+          MSG+="- Creación del repositorio: **$CREATE_REPO_STATUS**"
+          MSG+="- Configuración del repositorio: **$SETUP_REPO_STATUS**"
           if [ "$CREATE_REPO_STATUS" = "success" ] && [ "$SETUP_REPO_STATUS" = "success" ]; then
             REPO_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
-            MSG=$(cat <<EOF
-            ### Reporte
-            - Creación del repositorio: **$CREATE_REPO_STATUS**
-            - Configuración del repositorio: **$SETUP_REPO_STATUS**
-
-            ✅ El workflow finalizó correctamente y el repositorio fue creado/configurado.
-            🔗 Repositorio: $REPO_URL
-            EOF
-            )
+            MSG+="#### ✅ El workflow finalizó correctamente y el repositorio fue creado/configurado."
+            MSG+="#### 🔗 Repositorio: $REPO_URL"
           else
-            MSG=$(cat <<EOF
-            ### Reporte
-            - Creación del repositorio: **$CREATE_REPO_STATUS**
-            - Configuración del repositorio: **$SETUP_REPO_STATUS**
-
-            ❌ El workflow falló. Por favor revisa los logs para más detalles.
-            EOF
-            )
+            MSG+="### ❌ El workflow falló. Por favor revisa los logs para más detalles."
           fi
           gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body "$MSG"
 
