@@ -142,7 +142,7 @@ jobs:
       - name: Report Status
         if: always()
         run: |
-          MSG="### Reporte\n\n"
+          MSG="### 📑 Reporte\n\n"
           MSG+="- Creación del repositorio: **$CREATE_REPO_STATUS**\n"
           MSG+="- Configuración del repositorio: **$SETUP_REPO_STATUS**\n\n"
           if [ "$CREATE_REPO_STATUS" = "success" ] && [ "$SETUP_REPO_STATUS" = "success" ]; then
@@ -152,7 +152,7 @@ jobs:
           else
             MSG+="### ❌ El workflow falló. Por favor revisa los logs para más detalles.\n"
           fi
-          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body "$MSG"
+          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body "$(echo -e $MSG)"
 
       - name: Close Issue
         run: |
