@@ -4,9 +4,6 @@ on:
   issues:
     types: [opened]
 
-env:
-  ISSUE_NUMBER: ${{ github.event.issue.number }}
-
 jobs:
   parse-issue:
     permissions:
@@ -24,7 +21,7 @@ jobs:
           gh api \
             --method POST \
             -H "Accept: application/vnd.github+json" \
-            /repos/${{ github.repository }}/issues/$ISSUE_NUMBER/reactions \
+            /repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/reactions \
             -f content='eyes'
 
       - name: Checkout
@@ -51,15 +48,7 @@ jobs:
     environment:
       name: Setup Repository
     runs-on: ubuntu-latest
-    env:
-      REPO_OWNER: ${{ github.repository_owner }}
-      REPO_NAME: ${{ needs.parse-issue.outputs.repo-name }}
-      REPO_DESCRIPTION: ${{ needs.parse-issue.outputs.repo-description }}
-      REPO_TEMPLATE: ${{ needs.parse-issue.outputs.repo-template }}
     steps:
-      # - name: Checkout
-      #   uses: actions/checkout@v4
-
       - name: Get Token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -72,20 +61,14 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh repo create "$REPO_OWNER/$REPO_NAME" --public --description "$REPO_DESCRIPTION" --template "$REPO_TEMPLATE"
+          gh repo create "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.repo-name }}" --public --description "${{ needs.parse-issue.outputs.repo-description }}" --template "${{ needs.parse-issue.outputs.repo-template }}"
 
   setup-repository:
     needs: 
       - parse-issue
       - create-repository
     runs-on: ubuntu-latest
-    env:
-      REPO_OWNER: ${{ github.repository_owner }}
-      REPO_NAME: ${{ needs.parse-issue.outputs.repo-name }}
     steps:
-      # - name: Checkout
-      #   uses: actions/checkout@v4
-
       - name: Get Token
         uses: actions/create-github-app-token@v1
         id: app-token
@@ -98,13 +81,13 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh repo edit "$REPO_OWNER/$REPO_NAME" --delete-branch-on-merge
+          gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.repo-name }}" --delete-branch-on-merge
           case "${{ needs.parse-issue.outputs.repo-template }}" in
               "terraform-aws-module")
-                  gh repo edit "$REPO_OWNER/$REPO_NAME" --add-topic terraform --add-topic iac
+                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.repo-name }}" --add-topic terraform --add-topic iac
                   ;;
               "spring-boot-ms")
-                  gh repo edit "$REPO_OWNER/$REPO_NAME" --add-topic micro
+                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.repo-name }}" --add-topic micro
                   ;;
               *)
                   echo "Selecciona un repositorio valido"
@@ -121,7 +104,7 @@ jobs:
           --method PUT \
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          /orgs/$REPO_OWNER/teams/$TEAM/repos/$REPO_OWNER/$REPO_NAME \
+          /orgs/${{ github.repository_owner }}/teams/$TEAM/repos/${{ github.repository_owner }}/${{ needs.parse-issue.outputs.repo-name }} \
           -f "permission=push"
 
       - name: Set Custom Properties
@@ -132,7 +115,7 @@ jobs:
             --method PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            /repos/$REPO_OWNER/$REPO_NAME/properties/values \
+            /repos/${{ github.repository_owner }}/${{ needs.parse-issue.outputs.repo-name }}/properties/values \
             -f "properties[][property_name]=ownership" -f "properties[][value]=Kokodoki"
 
   report-status:
@@ -146,25 +129,21 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      CREATE_REPO_STATUS: ${{ needs.create-repository.result }}
-      SETUP_REPO_STATUS: ${{ needs.setup-repository.result }}
-      REPO_NAME: ${{ needs.parse-issue.outputs.repo-name }}
-      REPO_OWNER: ${{ github.repository_owner }}
     steps:
       - name: Report Status
         run: |
           MSG="### 📢 Reporte\n\n"
-          MSG+="- Creación del repositorio: **$CREATE_REPO_STATUS**\n"
-          MSG+="- Configuración del repositorio: **$SETUP_REPO_STATUS**\n\n"
-          if [ "$CREATE_REPO_STATUS" = "success" ] && [ "$SETUP_REPO_STATUS" = "success" ]; then
-            REPO_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
+          MSG+="- Creación del repositorio: **${{ needs.create-repository.result }}**\n"
+          MSG+="- Configuración del repositorio: **${{ needs.setup-repository.result }}**\n\n"
+          if [ "${{ needs.create-repository.result }}" = "success" ] && [ "${{ needs.setup-repository.result }}" = "success" ]; then
+            REPO_URL="https://github.com/${{ github.repository_owner }}/${{ needs.parse-issue.outputs.repo-name }}"
             MSG+="#### ✅ El workflow finalizó correctamente y el repositorio fue creado/configurado.\n\n"
-            MSG+="#### 🔗 Repositorio: $REPO_URL\n"
+            MSG+="#### 🔗 Repositorio: [${{ needs.parse-issue.outputs.repo-name }}]($REPO_URL)\n"
           else
             MSG+="### ❌ El workflow falló. Por favor revisa los logs para más detalles.\n"
           fi
-          gh issue comment "$ISSUE_NUMBER" --repo "${{ github.repository }}" --body "$(echo -e $MSG)"
+          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "$(echo -e $MSG)"
 
       - name: Close Issue
         run: |
-          gh issue close "$ISSUE_NUMBER" --repo "${{ github.repository }}" --reason completed
+          gh issue close "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --reason completed
