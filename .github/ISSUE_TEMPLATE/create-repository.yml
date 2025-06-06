@@ -32,7 +32,7 @@ body:
       label: '📦 Tipo de Template a Utilizar:'
       description: 'Selecciona el tipo de template base para este repositorio.'
       options:
-        - 'terraform-aws-module'
-        - 'spring-boot-ms'
+        - 'kokodoki/terraform-aws-module'
+        - 'kokodoki/spring-boot-ms'
     validations:
       required: true
