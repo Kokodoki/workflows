@@ -79,7 +79,7 @@ jobs:
   create-repository:
     needs: parse-issue
     environment:
-      name: ${{ env.ENVIRONMENT }}
+      name: Setup Repository
     runs-on: ubuntu-latest
     steps:
       - name: Get Token
