@@ -58,8 +58,8 @@ jobs:
           team_reviewers=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "Team") | .reviewer.name')
           teams_url=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "Team") | .reviewer.html_url')
           user_reviewers=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "User") | .reviewer.login')
-          echo "team_reviewers=$team_reviewers) >> $GITHUB_OUTPUT
-          echo "user_reviewers=$user_reviewers) >> $GITHUB_OUTPUT
+          echo "team_reviewers=$team_reviewers >> $GITHUB_OUTPUT
+          echo "user_reviewers=$user_reviewers >> $GITHUB_OUTPUT
 
       - name: Comment about required reviewers
         if: steps.get-reviewers.outputs.user_reviewers != '' || steps.get-reviewers.outputs.team_reviewers != ''
