@@ -4,6 +4,9 @@ on:
   issues:
     types: [opened]
 
+env:
+  ENVIRONMENT: Setup Repository
+
 jobs:
   parse-issue:
     permissions:
@@ -43,10 +46,40 @@ jobs:
           echo "repo-description=$(jq -r .description issue.json)" >> $GITHUB_OUTPUT
           echo "repo-template=$(jq -r '.template[0]' issue.json)" >> $GITHUB_OUTPUT
 
+      - name: Get required reviewers for ${{ env.ENVIRONMENT }} environment
+        id: get-reviewers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ENV_INFO=$(gh api \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/environments/${{ env.ENVIRONMENT }})
+
+          team_reviewers=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "Team") | .reviewer.name')
+          teams_url=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "Team") | .reviewer.html_url')
+          user_reviewers=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "User") | .reviewer.login')
+          echo "team_reviewers=$team_reviewers) >> $GITHUB_OUTPUT
+          echo "user_reviewers=$user_reviewers) >> $GITHUB_OUTPUT
+
+      - name: Comment about required reviewers
+        if: steps.get-reviewers.outputs.user_reviewers != '' || steps.get-reviewers.outputs.team_reviewers != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          MSG+="### ✅ Aprobaciones\n\n"
+          MSG+="El workflow está esperando la aprobación de al menos uno de los siguientes revisores:\n"
+          if [ "${{ steps.get-reviewers.outputs.user_reviewers }}" != "" ]; then
+            MSG+="Usuarios: ${{ steps.get-reviewers.outputs.user_reviewers }}\n"
+          fi
+          if [ "${{ steps.get-reviewers.outputs.team_reviewers }}" != "" ]; then
+            MSG+="Equipos: ${{ steps.get-reviewers.outputs.team_reviewers }}\n"
+          fi
+          gh issue comment "${{ github.event.issue.number }}" --repo "${{ github.repository }}" --body "$(echo -e $MSG)
+
   create-repository:
     needs: parse-issue
     environment:
-      name: Setup Repository
+      name: ${{ env.ENVIRONMENT }}
     runs-on: ubuntu-latest
     steps:
       - name: Get Token
