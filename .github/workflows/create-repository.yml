@@ -2,7 +2,7 @@ name: Automated Repository Creation
 
 on:
   issues:
-    types: [opened, reopened]
+    types: [opened]
 
 env:
   ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -13,9 +13,9 @@ jobs:
       issues: write
     runs-on: ubuntu-latest
     outputs:
-      name: ${{ steps.set-env.outputs.name }}
-      description: ${{ steps.set-env.outputs.description }}
-      template: ${{ steps.set-env.outputs.template }}
+      repo-name: ${{ steps.set-env.outputs.repo-name }}
+      repo-description: ${{ steps.set-env.outputs.repo-description }}
+      repo-template: ${{ steps.set-env.outputs.repo-template }}
     steps:
       - name: Add reaction to Issue
         env:
@@ -42,18 +42,23 @@ jobs:
         id: set-env
         run: |
           echo '${{ steps.parser.outputs.json }}' > issue.json
-          echo "name=$(jq -r .name issue.json)" >> $GITHUB_OUTPUT
-          echo "description=$(jq -r .description issue.json)" >> $GITHUB_OUTPUT
-          echo "template=$(jq -r '.template[0]' issue.json)" >> $GITHUB_OUTPUT
+          echo "repo-name=$(jq -r .name issue.json)" >> $GITHUB_OUTPUT
+          echo "repo-description=$(jq -r .description issue.json)" >> $GITHUB_OUTPUT
+          echo "repo-template=$(jq -r '.template[0]' issue.json)" >> $GITHUB_OUTPUT
 
   create-repository:
     needs: parse-issue
     environment:
       name: Setup Repository
     runs-on: ubuntu-latest
+    env:
+      REPO_OWNER: ${{ github.repository_owner }}
+      REPO_NAME: ${{ needs.parse-issue.outputs.repo-name }}
+      REPO_DESCRIPTION: ${{ needs.parse-issue.outputs.repo-description }}
+      REPO_TEMPLATE: ${{ needs.parse-issue.outputs.repo-template }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      # - name: Checkout
+      #   uses: actions/checkout@v4
 
       - name: Get Token
         uses: actions/create-github-app-token@v1
@@ -67,7 +72,7 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh repo create "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --public --description "${{ needs.parse-issue.outputs.description }}" --template "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.template }}"
+          gh repo create "$REPO_OWNER/$REPO_NAME" --public --description "$REPO_DESCRIPTION" --template "$REPO_TEMPLATE"
 
   setup-repository:
     needs: 
@@ -76,10 +81,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO_OWNER: ${{ github.repository_owner }}
-      REPO_NAME: ${{ needs.parse-issue.outputs.name }}
+      REPO_NAME: ${{ needs.parse-issue.outputs.repo-name }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      # - name: Checkout
+      #   uses: actions/checkout@v4
 
       - name: Get Token
         uses: actions/create-github-app-token@v1
@@ -90,14 +95,16 @@ jobs:
           owner: ${{ github.repository_owner }}
 
       - name: Add Topics
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --delete-branch-on-merge
-          case "${{ needs.parse-issue.outputs.template }}" in
+          gh repo edit "$REPO_OWNER/$REPO_NAME" --delete-branch-on-merge
+          case "${{ needs.parse-issue.outputs.repo-template }}" in
               "terraform-aws-module")
-                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --add-topic terraform --add-topic iac
+                  gh repo edit "$REPO_OWNER/$REPO_NAME" --add-topic terraform --add-topic iac
                   ;;
               "spring-boot-ms")
-                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --add-topic micro
+                  gh repo edit "$REPO_OWNER/$REPO_NAME" --add-topic micro
                   ;;
               *)
                   echo "Selecciona un repositorio valido"
@@ -141,7 +148,7 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       CREATE_REPO_STATUS: ${{ needs.create-repository.result }}
       SETUP_REPO_STATUS: ${{ needs.setup-repository.result }}
-      REPO_NAME: ${{ needs.parse-issue.outputs.name }}
+      REPO_NAME: ${{ needs.parse-issue.outputs.repo-name }}
       REPO_OWNER: ${{ github.repository_owner }}
     steps:
       - name: Report Status
