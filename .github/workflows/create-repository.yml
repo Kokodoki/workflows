@@ -49,6 +49,8 @@ jobs:
 
   create-repository:
     needs: parse-issue
+    environment:
+      name: Setup Repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
