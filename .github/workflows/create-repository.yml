@@ -53,7 +53,7 @@ jobs:
         run: |
           ENV_INFO=$(gh api \
             -H "Accept: application/vnd.github+json" \
-            "/repos/${{ github.repository }}/environments/${{ env.ENVIRONMENT }})"
+            "/repos/${{ github.repository }}/environments/${{ env.ENVIRONMENT }}")
 
           team_reviewers=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "Team") | .reviewer.name')
           teams_url=$(echo $ENV_INFO | jq -r '.protection_rules[0].reviewers[] | select(.type == "Team") | .reviewer.html_url')
