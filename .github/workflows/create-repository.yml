@@ -20,7 +20,6 @@ jobs:
       - name: Add reaction to Issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh api \
             --method POST \
@@ -69,18 +68,6 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh repo create "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --public --description "${{ needs.parse-issue.outputs.description }}" --template "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.template }}"
-          gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --delete-branch-on-merge
-          case "${{ needs.parse-issue.outputs.template }}" in
-              "terraform-aws-module")
-                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --add-topic terraform --add-topic iac
-                  ;;
-              "spring-boot-ms")
-                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --add-topic micro
-                  ;;
-              *)
-                  echo "Selecciona un repositorio valido"
-                  ;;
-          esac
 
   setup-repository:
     needs: 
@@ -101,6 +88,21 @@ jobs:
           app-id: ${{ vars.APP_ID_SETUP_REPO }}
           private-key: ${{ secrets.APP_PRIVATE_KEY_SETUP_REPO }}
           owner: ${{ github.repository_owner }}
+
+      - name: Add Topics
+        run: |
+          gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --delete-branch-on-merge
+          case "${{ needs.parse-issue.outputs.template }}" in
+              "terraform-aws-module")
+                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --add-topic terraform --add-topic iac
+                  ;;
+              "spring-boot-ms")
+                  gh repo edit "${{ github.repository_owner }}/${{ needs.parse-issue.outputs.name }}" --add-topic micro
+                  ;;
+              *)
+                  echo "Selecciona un repositorio valido"
+                  ;;
+          esac
 
       - name: Add Repository to Team
         id: permission
@@ -127,6 +129,7 @@ jobs:
             -f "properties[][property_name]=ownership" -f "properties[][value]=Kokodoki"
 
   report-status:
+    if: always()
     permissions:
       issues: write
     needs:
@@ -142,7 +145,6 @@ jobs:
       REPO_OWNER: ${{ github.repository_owner }}
     steps:
       - name: Report Status
-        if: always()
         run: |
           MSG="### 📢 Reporte\n\n"
           MSG+="- Creación del repositorio: **$CREATE_REPO_STATUS**\n"
